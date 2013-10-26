@@ -16,6 +16,7 @@ PROG="lsyncd"
 CMD="/usr/bin/$PROG"
 LOCKFILE="/var/lock/$PROG"
 CONFIG="/etc/lsyncd.lua"
+RUNAS="<%= node[:lsyncd][:user] || 'root' %>"
 RETVAL=0
 
 start() {
@@ -24,9 +25,10 @@ start() {
     echo
   else
     echo -n $"Starting $PROG: "
-    $CMD $CONFIG
+    su -c "$CMD $CONFIG" $RUNAS
     RETVAL=$?
     echo
+    echo GOT RETURN VAL $RETVAL
     [ $RETVAL = 0 ] && touch $LOCKFILE
     return $RETVAL
   fi
