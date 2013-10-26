@@ -20,15 +20,18 @@ RUNAS="<%= node[:lsyncd][:user] || 'root' %>"
 RETVAL=0
 
 start() {
-  if [ -f $LOCKFILE ]; then
-    echo -n $"$PROG is already running: "
+  if [ -f $LOCKFILE ] && [ "$(pidof $PROG)" ]; then
+    echo -n $"$PROG is already running: $(pidof $PROG)"
     echo
   else
+    if [ -f $LOCKFILE ]; then
+      echo -n "Lockfile found but process was not running. Removing lockfile..."
+      echo
+    fi
     echo -n $"Starting $PROG: "
     su -c "$CMD $CONFIG" $RUNAS
     RETVAL=$?
     echo
-    echo GOT RETURN VAL $RETVAL
     [ $RETVAL = 0 ] && touch $LOCKFILE
     return $RETVAL
   fi
@@ -57,3 +60,4 @@ case "$1" in
 esac
 
 exit $?
+
